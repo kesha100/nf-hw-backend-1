@@ -6,4 +6,3 @@ export interface Event {
     location:string;
     duration:string;
   }
-  

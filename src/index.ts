@@ -1,21 +1,29 @@
-import 'dotenv/config';
+// src/server.ts
 import express from 'express';
-import connectDB from './db';
-import globalRouter from './global-router';
-import { logger } from './logger';
+const connectDB = require('./db');
+import eventRouter from './events/event-router';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Connect to MongoDB
 connectDB();
 
-app.use(logger);
+// Middleware to parse JSON bodies
 app.use(express.json());
-app.use('/api/v1/',globalRouter);
 
+// Use event routes
+app.use('/api/v1', eventRouter); // Note the prefix '/api'
 
+const startServer = async () => {
+    try {
+        await connectDB(); // Ensure database connection is established
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error('Failed to start the server:', err);
+    }
+};
 
-
-app.listen(PORT, () => {
-  console.log(`Server runs at http://localhost:${PORT}`);
-});
+startServer();
