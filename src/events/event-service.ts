@@ -2,19 +2,17 @@ import { CreateEventDto } from './dtos/CreateEvent.dot';
 import { Event } from './types/response';
 import EventModel, { IEvent } from './models/event'; // Mongoose Event model
 
+// No changes needed here if the EventService class doesn't need any constructor parameters.
 class EventService {
-    async getEventById(id: number): Promise<Event | IEvent | null> {
-        // Check the database for the event by ID
+    async getEventById(id: string): Promise<Event | IEvent | null> {
         return EventModel.findById(id).exec();
     }
 
     async getEvents(): Promise<(Event | IEvent)[]> {
-        // Fetch all events from the database
         return EventModel.find().exec();
     }
 
     async createEvent(userDto: CreateEventDto): Promise<Event | IEvent> {
-        // Create a new event instance
         const newEvent = new EventModel({
             name: userDto.name,
             description: userDto.description,
@@ -23,10 +21,7 @@ class EventService {
             duration: userDto.duration,
         });
 
-        // Save the new event to the database
         await newEvent.save();
-
-        // Return the saved event
         return newEvent;
     }
 }

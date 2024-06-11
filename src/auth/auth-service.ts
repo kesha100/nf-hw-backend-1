@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import RefreshTokenModel from './models/RefreshToken';
-
+import User from './models/User';
 dotenv.config();
 
 class AuthService {
@@ -13,26 +13,35 @@ class AuthService {
   private readonly jwtRefreshSecret = process.env.JWT_REFRESH_SECRET!;
 
   async registerUser(createUserDto: CreateUserDto): Promise<IUser> {
-    const { email, password, username } = createUserDto;
+    const { email, password, username, city } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new UserModel({
       email,
       username,
       password: hashedPassword,
+      
     });
 
     await newUser.save();
     return newUser;
   }
 
-  async loginUser(email: string, password: string): Promise<{ user: IUser, accessToken: string, refreshToken: string } | null> {
+  async loginUser(email: string, password: string): Promise<IUser | null> {
+    console.log(`Attempting to log in user with email: ${email}`); // Debug logging
+
     const user = await UserModel.findOne({ email });
-    if (!user) return null;
+    if (!user) {
+      console.log('User not found'); // Debug logging
+      return null;
+    }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return null;
-
+    if (!isPasswordValid) {
+      console.log('Invalid password'); // Debug logging
+      return null;
+    }
+  
     const accessToken = this.generateJwt(user);
     const refreshToken = this.generateRefreshToken(user);
 
@@ -41,6 +50,7 @@ class AuthService {
 
     return { user, accessToken, refreshToken };
   }
+
 
   private generateJwt(user: IUser): string {
     return jwt.sign({ id: user._id, email: user.email }, this.jwtSecret, { expiresIn: '1h' });

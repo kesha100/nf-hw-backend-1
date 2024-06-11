@@ -2,6 +2,7 @@
 import express from 'express';
 const connectDB = require('./db');
 import eventRouter from './events/event-router';
+import authRouter from './auth/auth-router';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,8 +14,8 @@ connectDB();
 app.use(express.json());
 
 // Use event routes
-app.use('/api/v1', eventRouter); // Note the prefix '/api'
-
+app.use('/api/v1', eventRouter); 
+app.use('/api/v1', authRouter); 
 const startServer = async () => {
     try {
         await connectDB(); // Ensure database connection is established
